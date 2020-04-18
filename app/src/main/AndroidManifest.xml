@@ -42,7 +42,11 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
-        <receiver android:name="com.terabee.sdkdemo.service.BootCompletedBroadcastReceiver" />
+        <receiver android:name="com.terabee.sdkdemo.service.BootCompletedBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <service android:name=".service.ForegroundService" />
     </application>
 

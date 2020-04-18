@@ -96,9 +96,8 @@ class ForegroundService : Service() {
         startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, createNotification(applicationContext, text))
 
         DataCollector.addListener(sensorCallback)
-        DataCollector.start(this)
-
         try {
+            DataCollector.start(this)
             DataCollector.connectToDevice()
         } catch (t: Throwable) {
             Log.e(TAG, "Sensor connection failed", t)
