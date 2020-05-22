@@ -5,7 +5,9 @@ package com.terabee.sdkdemo.logic;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,11 +15,12 @@ import java.util.List;
 public class SignalDetector {
 
     // TODO: update these values for best results
-    private final static int lag = 30;
-    private final static double threshold = 5;
-    private final static double influence = 0;
-    private final static int bufferSize = 100;
-
+    private final static int lag = 100;
+    private final static double threshold = 3.5;
+    private final static double influence = 0.5;
+    private final static int bufferSize = 200; //40HZ OR 20HZ id the device sample rate
+    //buffer_400 => 10sec window sample
+    //buffer_200 => 5sec window sample
 
     private List<Double> rawDataValues = new ArrayList<Double>();
     private List<Long> rawDataTimeStamps = new ArrayList<Long>(2 * bufferSize);
@@ -29,28 +32,56 @@ public class SignalDetector {
      * @return list of entries timestamps
      */
     public List<Long> processSignal(Double distance) {
-        rawDataValues.add(distance);
-        rawDataTimeStamps.add(System.currentTimeMillis());
-
         List<Long> verifiedEntries = new LinkedList<>();
+        try {
+            //edit the distance value:
+            Double distanceFixed = distance;
+            if (distanceFixed >= 3000) distanceFixed = 3000.0;
+            if (distanceFixed < 0) distanceFixed = 0.0;
+            distanceFixed = 3000 - distanceFixed;
 
-        // collect at least 100 samples and wait for the sensor to be idle
-        if (rawDataValues.size() < bufferSize || distance <= 0) return verifiedEntries;
+            //Continue saving sample to the buffer:
+            rawDataValues.add(distance);
+            rawDataTimeStamps.add(System.currentTimeMillis());
 
-        DataForSignals dataForSignals = analyzeDataForSignals(rawDataValues);
-        List<Integer> signalsList = dataForSignals.signals;
+            // collect at least [bufferSize] samples and wait for the sensor to be idle
+            if (rawDataValues.size() < bufferSize || distance <= 0) return verifiedEntries;
 
-        if (signalsList != null)
-            for (int i = 0; i < signalsList.size(); i++) {
-                if (signalsList.get(i) != 0) {
-                    System.out.println("Point " + i + " gave signal " + signalsList.get(i));
-                    verifiedEntries.add(rawDataTimeStamps.get(i));
+            //After collecting samples in the array (in the size of [bufferSize])
+            //start to analyze the sample-array in order to find PEEKS [people counting]
+
+            //first: convert the vector to it's median value (1D 5 sample median)
+            com.terabee.sdkdemo.filter.MedianFilter medFilt = new com.terabee.sdkdemo.filter.MedianFilter();
+            List<Double> meanDataValues = medFilt.getMean(rawDataValues, 5);
+            System.out.println("size of  rawDataValues=" + rawDataValues.size());
+            System.out.println("size of  meanDataValues=" + meanDataValues.size());
+
+            //then: use the algorithm to find the peeks:
+            DataForSignals dataForSignals = analyzeDataForSignals(meanDataValues);
+            List<Integer> signalsList = dataForSignals.signals;
+
+            boolean isInPeekState = false;
+            int lastIndexPeekStart = 0;
+            if (signalsList != null)
+                for (int i = 0; i < signalsList.size(); i++) {
+                    if (signalsList.get(i) > 0.8 && !isInPeekState) {
+                        isInPeekState = true;
+                        lastIndexPeekStart = i;
+                        System.out.println("Point " + i + " gave signal " + signalsList.get(i));
+                        verifiedEntries.add((long) i);
+                    } else {
+                        if ((i - lastIndexPeekStart) > 6)
+                            isInPeekState = false;
+                    }
                 }
-            }
 
-        rawDataValues.clear();
-        rawDataTimeStamps.clear();
-        return verifiedEntries;
+            rawDataValues.clear();
+            rawDataTimeStamps.clear();
+            return verifiedEntries;
+        }
+        catch(Exception e){
+            return verifiedEntries;
+        }
     }
 
     private DataForSignals analyzeDataForSignals(List<Double> data) {

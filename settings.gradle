@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':Terabee_SDK_1.1.3'
