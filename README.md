@@ -1,4 +1,4 @@
-# TerabeeEvoMiniAsAndroidService
+# CountSensorAndroidService
 
 ## TODO:
 0. prepare a simulator that can stream values (to emaulate the sensor). mostley value=0. sometimes value = 1500 
