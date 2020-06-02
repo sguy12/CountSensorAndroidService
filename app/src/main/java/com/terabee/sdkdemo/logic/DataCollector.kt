@@ -96,13 +96,15 @@ object DataCollector {
          **/
         @Synchronized
         override fun onDistanceReceived(distance: Int, dataBandwidth: Int, dataSpeed: Int) {
-
             listeners.forEach {
-                it.get()?.onDistanceReceived(distance, dataBandwidth, dataSpeed)
+                it.get()?.onDistanceReceived(signalDetector.LastDistance, signalDetector.CurrentSize, dataSpeed)
             }
             val d : List<Long> = signalDetector.processSignal(distance.toDouble())
-            if (d.isNotEmpty())
+            if (d.isNotEmpty()) {
                 onEntryListReceived(d)
+            }
+            if(signalDetector.IsDone)
+                signalDetector.Reset()
         }
 
         @Synchronized

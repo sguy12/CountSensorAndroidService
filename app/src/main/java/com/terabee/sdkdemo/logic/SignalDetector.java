@@ -9,6 +9,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,13 +19,30 @@ public class SignalDetector {
     private final static int lag = 100;
     private final static double threshold = 3.5;
     private final static double influence = 0.5;
-    private final static int bufferSize = 200; //40HZ OR 20HZ id the device sample rate
+    private final static int bufferSize = 800; //40HZ OR 20HZ id the device sample rate
     //buffer_400 => 10sec window sample
     //buffer_200 => 5sec window sample
 
-    private List<Double> rawDataValues = new ArrayList<Double>();
-    private List<Long> rawDataTimeStamps = new ArrayList<Long>(2 * bufferSize);
+    public int LastDistance = -1;
+    public int LastSignalsSize = -1;
 
+    public boolean IsInProc = false;
+    public boolean IsDone = false;
+    public int CurrentSize = 0;
+    public int errLine = 0;
+
+    private List<Double> rawDataValues = new ArrayList<Double>();
+    //private List<Long> rawDataTimeStamps = new ArrayList<Long>(2 * bufferSize);
+    private List<Long> verifiedEntries = new LinkedList<>();
+
+    public void Reset()
+    {
+        rawDataValues = new ArrayList<Double>();
+        verifiedEntries = new LinkedList<Long>();
+        CurrentSize = 0;
+        LastDistance = -1;
+        IsDone = false;
+    }
     /**
      * get distance and checks is it result is an entry
      *
@@ -32,55 +50,91 @@ public class SignalDetector {
      * @return list of entries timestamps
      */
     public List<Long> processSignal(Double distance) {
-        List<Long> verifiedEntries = new LinkedList<>();
         try {
-            //edit the distance value:
-            Double distanceFixed = distance;
-            if (distanceFixed >= 3000) distanceFixed = 3000.0;
-            if (distanceFixed < 0) distanceFixed = 0.0;
-            distanceFixed = 3000 - distanceFixed;
+            if(IsDone || IsInProc || distance < 0)
+                return new LinkedList<Long>();
 
-            //Continue saving sample to the buffer:
-            rawDataValues.add(distance);
-            rawDataTimeStamps.add(System.currentTimeMillis());
+            //edit the distance value:
+
+            Double distanceFixed = distance;
+            //if(distanceFixed == 0) distanceFixed = 3000.0;
+            if(distanceFixed > 3000) distanceFixed = 3000.0;
+            //distanceFixed = 3000.0 - distanceFixed;
+            LastDistance = distanceFixed.intValue();
+
+            //CurrentSize++;
+            rawDataValues.add(distanceFixed);
+            CurrentSize = rawDataValues.size();
+
+            if(CurrentSize > 50) {
+                errLine = 0;
+                LastSignalsSize = -3;
+            }
 
             // collect at least [bufferSize] samples and wait for the sensor to be idle
-            if (rawDataValues.size() < bufferSize || distance <= 0) return verifiedEntries;
+            //if (rawDataValues.size() < bufferSize || distance < 0) return new LinkedList<>();
+            if(CurrentSize < bufferSize) return new LinkedList<Long>();
+
+            errLine = 100;
+            IsInProc = true;
+            if(verifiedEntries == null)
+                verifiedEntries = new LinkedList<Long>();
 
             //After collecting samples in the array (in the size of [bufferSize])
             //start to analyze the sample-array in order to find PEEKS [people counting]
 
+            errLine = 200;
             //first: convert the vector to it's median value (1D 5 sample median)
             com.terabee.sdkdemo.filter.MedianFilter medFilt = new com.terabee.sdkdemo.filter.MedianFilter();
             List<Double> meanDataValues = medFilt.getMean(rawDataValues, 5);
             System.out.println("size of  rawDataValues=" + rawDataValues.size());
             System.out.println("size of  meanDataValues=" + meanDataValues.size());
 
+            errLine = 300;
+            //errLine = meanDataValues.size();
             //then: use the algorithm to find the peeks:
             DataForSignals dataForSignals = analyzeDataForSignals(meanDataValues);
             List<Integer> signalsList = dataForSignals.signals;
 
+
+            errLine = 400;
             boolean isInPeekState = false;
             int lastIndexPeekStart = 0;
-            if (signalsList != null)
+            Date date= new Date();
+            long time = date.getTime(); //Time in Milliseconds
+            //C#: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            
+            if (signalsList != null) {
+                errLine = 500;
+                LastSignalsSize = signalsList.size();
                 for (int i = 0; i < signalsList.size(); i++) {
-                    if (signalsList.get(i) > 0.8 && !isInPeekState) {
+                    if (signalsList.get(i) > 0 && !isInPeekState) {
                         isInPeekState = true;
                         lastIndexPeekStart = i;
                         System.out.println("Point " + i + " gave signal " + signalsList.get(i));
-                        verifiedEntries.add((long) i);
+                        verifiedEntries.add(time);
+                        //verifiedEntries.add((long) i);
                     } else {
-                        if ((i - lastIndexPeekStart) > 6)
+                        if ((i - lastIndexPeekStart) > 7)
                             isInPeekState = false;
                     }
                 }
+            }else{
+                LastSignalsSize = -2;
+            }
 
+            errLine = 600;
             rawDataValues.clear();
-            rawDataTimeStamps.clear();
+
+            errLine = 700;
+            IsDone = true;
+            IsInProc = false;
             return verifiedEntries;
         }
         catch(Exception e){
-            return verifiedEntries;
+            IsDone = true;
+            IsInProc = false;
+            return new LinkedList<>();
         }
     }
 

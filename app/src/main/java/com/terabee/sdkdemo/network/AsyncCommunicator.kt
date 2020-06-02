@@ -25,11 +25,13 @@ object AsyncCommunicator {
     private val condition = lock.newCondition()
     private val entriesQueue : MutableList<Long> = mutableListOf()
 
+    private var totalCount: Int = 0
+
     fun start(context: Context) {
         this.context = context
         if (!networkThread.isAlive) {
             entriesQueue.clear()
-            entriesQueue.addAll(Preferences.loadEntriesList(context))
+            //entriesQueue.addAll(Preferences.loadEntriesList(context))
             shouldThreadRun = true
             networkThread.start()
         }
@@ -47,19 +49,34 @@ object AsyncCommunicator {
             entriesQueue.addAll(0, entries)
             condition.signal()
         }
-        Preferences.saveEntriesList(context, entries)
+        //Preferences.saveEntriesList(context, entries)
     }
 
     private fun sendQueuedMessages() {
         while (shouldThreadRun) {
+            var entries: MutableList<Long> = mutableListOf()
             var entryTimestamp: Long = -1
+            var lastEntryTimestamp: Long = -1
             lock.withLock {
-                if (entriesQueue.isNotEmpty())
-                    entryTimestamp = entriesQueue.removeAt(entriesQueue.size - 1)
-                else
+                if (entriesQueue.isNotEmpty()) {
+                    var k: Int = 0
+                    //entryTimestamp = entriesQueue.removeAt(entriesQueue.size - 1)
+                    for (entry in entriesQueue) {
+                        if (++k % 2 != 0) //add only ODD entries
+                            entries.add(entry)
+                    }
+                    lastEntryTimestamp = entriesQueue.removeAt(entriesQueue.size - 1)
+                    entriesQueue.clear()
+                    if (k % 2 == 0) {
+                        entriesQueue.add(lastEntryTimestamp)
+                    }else{}
+                }
+                else {
                     condition.await(5, TimeUnit.MINUTES)
+                }
             }
-            if (entryTimestamp > 0) {
+
+            if (entries.isNotEmpty()) {
                 try {
                     val urlString = BASE_URL + entryTimestamp
                     val request = Request.Builder()
@@ -75,8 +92,8 @@ object AsyncCommunicator {
                     Log.w(TAG, "sendQueuedMessages request error", t)
                     /* when network request fails, put the entryTimestamp back and wait*/
                     lock.withLock {
-                        entriesQueue.add(entriesQueue.size, entryTimestamp)
-                        condition.await(5, TimeUnit.MINUTES)
+                        entriesQueue.addAll(0, entries)
+                        //condition.await(5, TimeUnit.MINUTES)
                     }
                 }
             }
