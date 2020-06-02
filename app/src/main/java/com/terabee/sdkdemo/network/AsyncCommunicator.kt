@@ -5,7 +5,6 @@ package com.terabee.sdkdemo.network
 
 import android.content.Context
 import android.util.Log
-import com.terabee.sdkdemo.persistence.Preferences
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response

@@ -72,7 +72,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all {
-            def appName = "Terabee_SDK_Demo_App"
+            def appName = "cleen people counter AP"
             def buildType = variant.variantData.variantConfiguration.buildType.name
             def newName;
 

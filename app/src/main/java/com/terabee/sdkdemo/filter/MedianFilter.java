@@ -2,11 +2,8 @@ package com.terabee.sdkdemo.filter;
 
 import org.apache.commons.math3.stat.StatUtils;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class MedianFilter {
     /**

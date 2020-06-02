@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.PowerManager
 import android.util.Log
-import android.widget.Switch
 import androidx.annotation.Keep
 import com.terabee.sdk.TerabeeSdk
 import com.terabee.sdk.TerabeeSdk.MultiflexConfiguration

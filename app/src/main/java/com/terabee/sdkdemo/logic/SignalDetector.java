@@ -5,9 +5,7 @@ package com.terabee.sdkdemo.logic;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -103,7 +101,7 @@ public class SignalDetector {
             Date date= new Date();
             long time = date.getTime(); //Time in Milliseconds
             //C#: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-            
+
             if (signalsList != null) {
                 errLine = 500;
                 LastSignalsSize = signalsList.size();

@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             "Enable Sensor 8"
     };
 
-    private ActivityMainBinding mBinding;
+    public ActivityMainBinding mBinding;
     private SensorCallback sensorCallback = new SensorCallback() {
 
         @Override
