@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.terabee.sdkdemo">
+    package="com.cleen.peoplecounterapp">
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:name=".App"
+        android:name="com.clean.peoplecounterapp.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -26,7 +26,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".MainActivity"
+            android:name="com.clean.peoplecounterapp.MainActivity"
             android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,12 +42,13 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
-        <receiver android:name="com.terabee.sdkdemo.service.BootCompletedBroadcastReceiver" >
+        <receiver android:name="com.clean.peoplecounterapp.service.BootCompletedBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-        <service android:name=".service.ForegroundService" />
+        <service android:name="com.clean.peoplecounterapp.service.ForegroundService" />
     </application>
 
 </manifest>

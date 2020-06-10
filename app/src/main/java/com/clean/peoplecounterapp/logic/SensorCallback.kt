@@ -1,7 +1,4 @@
-/*
- * Created by Asaf Pinhassi on 19/04/2020.
- */
-package com.terabee.sdkdemo.logic
+package com.clean.peoplecounterapp.logic
 
 import com.terabee.sdk.TerabeeSdk
 

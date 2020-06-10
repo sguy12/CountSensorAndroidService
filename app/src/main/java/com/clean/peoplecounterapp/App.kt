@@ -1,11 +1,8 @@
-/*
- * Created by Asaf Pinhassi on 19/04/2020.
- */
-package com.terabee.sdkdemo
+package com.clean.peoplecounterapp
 
 import android.app.Application
-import com.terabee.sdkdemo.network.AsyncCommunicator
-import com.terabee.sdkdemo.service.ForegroundService
+import com.jakewharton.threetenabp.AndroidThreeTen
+import com.clean.peoplecounterapp.service.ForegroundService
 
 
 class App : Application() {
@@ -18,7 +15,7 @@ class App : Application() {
     }
 
     private fun initComponents(){
-        AsyncCommunicator.start(this)
         ForegroundService.startService(this,"Starting...");
+        AndroidThreeTen.init(this)
     }
 }

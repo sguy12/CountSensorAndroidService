@@ -1,8 +1,6 @@
-/*
- * Created by Asaf Pinhassi on 19/04/2020.
- */
-package com.terabee.sdkdemo.logic;
+package com.clean.peoplecounterapp.logic;
 
+import com.clean.peoplecounterapp.filter.MedianFilter;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
@@ -56,8 +54,8 @@ public class SignalDetector {
 
             Double distanceFixed = distance;
             //if(distanceFixed == 0) distanceFixed = 3000.0;
-            if(distanceFixed > 3000) distanceFixed = 3000.0;
-            //distanceFixed = 3000.0 - distanceFixed;
+            if(distanceFixed > 2000) distanceFixed = 3000.0;
+            distanceFixed = 3000.0 - distanceFixed;
             LastDistance = distanceFixed.intValue();
 
             //CurrentSize++;
@@ -83,7 +81,7 @@ public class SignalDetector {
 
             errLine = 200;
             //first: convert the vector to it's median value (1D 5 sample median)
-            com.terabee.sdkdemo.filter.MedianFilter medFilt = new com.terabee.sdkdemo.filter.MedianFilter();
+            MedianFilter medFilt = new MedianFilter();
             List<Double> meanDataValues = medFilt.getMean(rawDataValues, 5);
             System.out.println("size of  rawDataValues=" + rawDataValues.size());
             System.out.println("size of  meanDataValues=" + meanDataValues.size());

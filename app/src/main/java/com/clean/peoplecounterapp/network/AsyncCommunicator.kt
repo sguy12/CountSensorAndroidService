@@ -1,7 +1,7 @@
 /*
  * Created by Asaf Pinhassi on 19/04/2020.
  */
-package com.terabee.sdkdemo.network
+package com.clean.peoplecounterapp.network
 
 import android.content.Context
 import android.util.Log
@@ -27,7 +27,7 @@ object AsyncCommunicator {
     private var totalCount: Int = 0
 
     fun start(context: Context) {
-        this.context = context
+        AsyncCommunicator.context = context
         if (!networkThread.isAlive) {
             entriesQueue.clear()
             //entriesQueue.addAll(Preferences.loadEntriesList(context))
@@ -64,7 +64,8 @@ object AsyncCommunicator {
                         if (++k % 2 != 0) //add only ODD entries
                             entries.add(entry)
                     }
-                    lastEntryTimestamp = entriesQueue.removeAt(entriesQueue.size - 1)
+                    lastEntryTimestamp = entriesQueue.removeAt(
+                            entriesQueue.size - 1)
                     entriesQueue.clear()
                     if (k % 2 == 0) {
                         entriesQueue.add(lastEntryTimestamp)

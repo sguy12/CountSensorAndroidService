@@ -1,5 +1,6 @@
-package com.terabee.sdkdemo.service
+package com.clean.peoplecounterapp.service
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -48,7 +49,10 @@ class BootCompletedBroadcastReceiver : BroadcastReceiver() {
      * @param context The Context in which the receiver is running.
      * @param intent The Intent being received.
      */
+    @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.i(TAG, "BootCompletedBroadcastReceiver received a message")
+        ForegroundService.startService(
+                context ?: return, "Service is running")
     }
 }

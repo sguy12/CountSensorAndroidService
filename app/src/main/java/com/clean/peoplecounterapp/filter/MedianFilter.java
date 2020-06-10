@@ -1,4 +1,4 @@
-package com.terabee.sdkdemo.filter;
+package com.clean.peoplecounterapp.filter;
 
 import org.apache.commons.math3.stat.StatUtils;
 

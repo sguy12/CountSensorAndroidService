@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">Terabee Sdk Demo</string>
+    <string name="app_name">Clean people counter APP</string>
+    <string name="activityTitle">Clean People Counter APP 30</string>
+    <string name="sensorTypeTitle">Sensor type</string>
+    <string name="configuration">Configuration ...</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="dataBandwidth">Data Bandwidth:</string>
+    <string name="initialSize">0</string>
+    <string name="entries">Entries:</string>
+    <string name="lastChunk">Last chunk:</string>
 </resources>
