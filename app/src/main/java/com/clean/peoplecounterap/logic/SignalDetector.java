@@ -1,6 +1,6 @@
-package com.clean.peoplecounterapp.logic;
+package com.clean.peoplecounterap.logic;
 
-import com.clean.peoplecounterapp.filter.MedianFilter;
+import com.clean.peoplecounterap.filter.MedianFilter;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;

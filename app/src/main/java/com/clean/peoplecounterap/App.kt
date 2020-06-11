@@ -1,8 +1,8 @@
-package com.clean.peoplecounterapp
+package com.clean.peoplecounterap
 
 import android.app.Application
 import com.jakewharton.threetenabp.AndroidThreeTen
-import com.clean.peoplecounterapp.service.ForegroundService
+import com.clean.peoplecounterap.service.ForegroundService
 
 
 class App : Application() {

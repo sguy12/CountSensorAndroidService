@@ -1,4 +1,4 @@
-package com.clean.peoplecounterapp.logic
+package com.clean.peoplecounterap.logic
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,10 +7,10 @@ import android.util.Log
 import androidx.annotation.Keep
 import com.terabee.sdk.TerabeeSdk
 import com.terabee.sdk.TerabeeSdk.MultiflexConfiguration
-import com.clean.peoplecounterapp.logic.DataCollector.init
-import com.clean.peoplecounterapp.logic.SensorState.Connected
-import com.clean.peoplecounterapp.logic.SensorState.Connecting
-import com.clean.peoplecounterapp.logic.SensorState.Disconnected
+import com.clean.peoplecounterap.logic.DataCollector.init
+import com.clean.peoplecounterap.logic.SensorState.Connected
+import com.clean.peoplecounterap.logic.SensorState.Connecting
+import com.clean.peoplecounterap.logic.SensorState.Disconnected
 import java.lang.ref.WeakReference
 import java.util.HashMap
 import java.util.LinkedHashSet

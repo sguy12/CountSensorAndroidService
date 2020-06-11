@@ -1,4 +1,4 @@
-package com.clean.peoplecounterapp.service
+package com.clean.peoplecounterap.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -11,13 +11,13 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.clean.peoplecounterapp.MainActivity
-import com.cleen.peoplecounterapp.R
-import com.clean.peoplecounterapp.logic.DataCollector
-import com.clean.peoplecounterapp.logic.SensorCallback
-import com.clean.peoplecounterapp.logic.SensorState
-import com.clean.peoplecounterapp.repository.remote.RestManager
-import com.clean.peoplecounterapp.repository.remote.request.PostRequest
+import com.clean.peoplecounterap.MainActivity
+import com.clean.peoplecounterap.R
+import com.clean.peoplecounterap.logic.DataCollector
+import com.clean.peoplecounterap.logic.SensorCallback
+import com.clean.peoplecounterap.logic.SensorState
+import com.clean.peoplecounterap.repository.remote.RestManager
+import com.clean.peoplecounterap.repository.remote.request.PostRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -35,7 +35,7 @@ import kotlin.concurrent.timerTask
 class ForegroundService : Service() {
 
     companion object {
-        private const val FOREGROUND_SERVICE_NOTIFICATION_ID : Int = 10
+        private const val FOREGROUND_SERVICE_NOTIFICATION_ID: Int = 10
         private const val CHANNEL_ID = "ForegroundServiceChannel"
 
         private val entries = mutableListOf<PostRequest>()
@@ -84,14 +84,12 @@ class ForegroundService : Service() {
 
         override fun onEntryListReceived(entryTimestamps: List<Long>) {
             val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-            val item = PostRequest(
-                    format.format(Calendar.getInstance().time), entryTimestamps.size)
+            val item = PostRequest(format.format(Calendar.getInstance().time), entryTimestamps.size)
             entries.add(item)
         }
 
         override fun onDistanceReceived(distance: Int, dataBandwidth: Int, dataSpeed: Int) {
-            updateNotification(
-                    applicationContext,
+            updateNotification(applicationContext,
                     "Bandwidth: $dataBandwidth | Distance: $distance")
         }
 
@@ -109,9 +107,7 @@ class ForegroundService : Service() {
         if (entries.isNotEmpty()) {
             try {
                 job = GlobalScope.launch(Dispatchers.IO) {
-                    RestManager(
-                            applicationContext).somePost(
-                            entries)
+                    RestManager(applicationContext).somePost(entries)
                     entries.clear()
                 }
             } catch (e: Exception) {
@@ -126,10 +122,8 @@ class ForegroundService : Service() {
         val text = intent?.getStringExtra("inputExtra") ?: ""
         createNotificationChannel()
 
-        startForeground(
-                FOREGROUND_SERVICE_NOTIFICATION_ID,
-                createNotification(
-                        applicationContext, text))
+        startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID,
+                createNotification(applicationContext, text))
 
         DataCollector.addListener(sensorCallback)
         try {

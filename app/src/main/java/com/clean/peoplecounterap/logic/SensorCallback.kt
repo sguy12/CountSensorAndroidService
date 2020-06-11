@@ -1,4 +1,4 @@
-package com.clean.peoplecounterapp.logic
+package com.clean.peoplecounterap.logic
 
 import com.terabee.sdk.TerabeeSdk
 

@@ -1,7 +1,7 @@
 /*
  * Created by Asaf Pinhassi on 19/04/2020.
  */
-package com.clean.peoplecounterapp.network
+package com.clean.peoplecounterap.network
 
 import android.content.Context
 import android.util.Log
@@ -22,7 +22,7 @@ object AsyncCommunicator {
     private lateinit var context: Context
     private val lock = ReentrantLock()
     private val condition = lock.newCondition()
-    private val entriesQueue : MutableList<Long> = mutableListOf()
+    private val entriesQueue: MutableList<Long> = mutableListOf()
 
     private var totalCount: Int = 0
 
@@ -64,14 +64,13 @@ object AsyncCommunicator {
                         if (++k % 2 != 0) //add only ODD entries
                             entries.add(entry)
                     }
-                    lastEntryTimestamp = entriesQueue.removeAt(
-                            entriesQueue.size - 1)
+                    lastEntryTimestamp = entriesQueue.removeAt(entriesQueue.size - 1)
                     entriesQueue.clear()
                     if (k % 2 == 0) {
                         entriesQueue.add(lastEntryTimestamp)
-                    }else{}
-                }
-                else {
+                    } else {
+                    }
+                } else {
                     condition.await(5, TimeUnit.MINUTES)
                 }
             }
@@ -86,8 +85,9 @@ object AsyncCommunicator {
                     val client: OkHttpClient = OkHttpClient()
                     val response: Response = client.newCall(request).execute()
                     if (!response.isSuccessful)
-                        throw Exception("Error sending message to server. response code:${response.code}")
-                    Log.i(TAG,"Entry sent successfully. entryTimestamp: $entryTimestamp")
+                        throw Exception(
+                                "Error sending message to server. response code:${response.code}")
+                    Log.i(TAG, "Entry sent successfully. entryTimestamp: $entryTimestamp")
                 } catch (t: Throwable) {
                     Log.w(TAG, "sendQueuedMessages request error", t)
                     /* when network request fails, put the entryTimestamp back and wait*/
@@ -98,7 +98,5 @@ object AsyncCommunicator {
                 }
             }
         }
-
     }
-
 }

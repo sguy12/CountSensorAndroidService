@@ -1,4 +1,4 @@
-package com.clean.peoplecounterapp.filter;
+package com.clean.peoplecounterap.filter;
 
 import org.apache.commons.math3.stat.StatUtils;
 
