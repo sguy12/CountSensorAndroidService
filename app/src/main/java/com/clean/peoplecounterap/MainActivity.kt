@@ -230,7 +230,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        entriesCounter = 0
         entriesCount.text = entriesCounter.toString()
         lastChunkText.text = ""
     }
