@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.view.View
@@ -21,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doOnTextChanged
 import com.clean.peoplecounterap.data.local.SPManager
 import com.clean.peoplecounterap.logic.DataCollector.addListener
 import com.clean.peoplecounterap.logic.DataCollector.config
@@ -55,12 +57,14 @@ import kotlinx.android.synthetic.main.activity_main.connect
 import kotlinx.android.synthetic.main.activity_main.data
 import kotlinx.android.synthetic.main.activity_main.disconnect
 import kotlinx.android.synthetic.main.activity_main.entriesCount
+import kotlinx.android.synthetic.main.activity_main.etSensorHeight
 import kotlinx.android.synthetic.main.activity_main.etSymbolsToSend
 import kotlinx.android.synthetic.main.activity_main.lastChunkText
 import kotlinx.android.synthetic.main.activity_main.llActivityRoot
 import kotlinx.android.synthetic.main.activity_main.sensor_type
 import kotlinx.android.synthetic.main.activity_main.tvDataBandwidth
 import kotlinx.android.synthetic.main.activity_main.tvLogCat
+import kotlinx.android.synthetic.main.activity_main.tvRemain
 import kotlinx.android.synthetic.main.activity_main.tvTokenResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -72,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     private var entriesCounter = 0
     private var selectedSensors: BooleanArray? = null
-    private lateinit var spManager : SPManager
+    private lateinit var spManager: SPManager
     private val sensorCallback: SensorCallback = object : SensorCallback {
         override fun onEntryListReceived(entryTimestamps: List<Long>) {
             updateEntries(entryTimestamps)
@@ -110,6 +114,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val nextRequestReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            countDownTimer.start()
+        }
+    }
+
+    private val countDownTimer = object : CountDownTimer(5 * 60 * 1000L, 1000L) {
+        override fun onFinish() {
+        }
+
+        override fun onTick(millisUntilFinished: Long) {
+            val remainedSecs = millisUntilFinished / 1000
+            tvRemain.text = "Time remain: " + (remainedSecs / 60) + ":" + (remainedSecs % 60)
+        }
+    }
+
     @SuppressLint("ShowToast", "MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,9 +157,14 @@ class MainActivity : AppCompatActivity() {
         updateUiState(sensorState, false)
         addListener(sensorCallback)
         registerReceiver(logReceiver, IntentFilter("LOG"))
+        registerReceiver(nextRequestReceiver, IntentFilter("NEXT_REQUEST"))
         btnSubmit.setOnClickListener { checkIsLetterValid() }
         spManager = SPManager(this)
         if (spManager.sName?.isNotEmpty() == true) setSName()
+        etSensorHeight.setText(spManager.sensorHeight.toString())
+        etSensorHeight.doOnTextChanged { text, _, _, _ ->
+            text?.toString()?.toIntOrNull()?.let { spManager.sensorHeight = it }
+        }
     }
 
     private fun checkIsLetterValid() {
@@ -213,6 +238,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         removeListener(sensorCallback)
         unregisterReceiver(logReceiver)
+        unregisterReceiver(nextRequestReceiver)
+        countDownTimer.cancel()
         super.onDestroy()
     }
 
@@ -259,8 +286,7 @@ class MainActivity : AppCompatActivity() {
             entriesCounter += list.size
             entriesCount.text = entriesCounter.toString()
             val dateStr = Date(list[list.size - 1]).toString()
-            val lastChunk = dateStr + ": " + list.size + " items"
-            lastChunkText.text = lastChunk
+            lastChunkText.text = dateStr + ": " + list.size + " items"
         }
     }
 

@@ -5,12 +5,13 @@ import android.content.Context
 import android.os.PowerManager
 import android.util.Log
 import androidx.annotation.Keep
-import com.terabee.sdk.TerabeeSdk
-import com.terabee.sdk.TerabeeSdk.MultiflexConfiguration
+import com.clean.peoplecounterap.data.local.SPManager
 import com.clean.peoplecounterap.logic.DataCollector.init
 import com.clean.peoplecounterap.logic.SensorState.Connected
 import com.clean.peoplecounterap.logic.SensorState.Connecting
 import com.clean.peoplecounterap.logic.SensorState.Disconnected
+import com.terabee.sdk.TerabeeSdk
+import com.terabee.sdk.TerabeeSdk.MultiflexConfiguration
 import java.lang.ref.WeakReference
 import java.util.HashMap
 import java.util.LinkedHashSet
@@ -43,6 +44,7 @@ object DataCollector {
      */
     fun init(context: Context) {
         DataCollector.context = context
+        signalDetector.setSensorInstalledHeight(SPManager(context).sensorHeight)
 
         // init Terabee Sdk
         TerabeeSdk.getInstance().init(context)
@@ -54,8 +56,7 @@ object DataCollector {
         // set callback for receive data from sensors
         // can use single callback instead of callback for each sensor
         // this approach more convenient for connection with auto detect of sensor
-        TerabeeSdk.getInstance().registerDataReceive(
-                dataCollectorSensorCallback)
+        TerabeeSdk.getInstance().registerDataReceive(dataCollectorSensorCallback)
 /*
         timer.schedule(timerTask { // emulate sensor emitter
             listeners.forEach { it.get()?.onEntryListReceived(listOf(10L, 20L, 30L)) }
@@ -83,8 +84,7 @@ object DataCollector {
     }
 
     /////////////////////////////////////////////////////////
-    private val dataCollectorSensorCallback: SensorCallback = object :
-            SensorCallback {
+    private val dataCollectorSensorCallback: SensorCallback = object : SensorCallback {
         @Synchronized
         override fun onMatrixReceived(list: List<List<Int>>, dataBandwidth: Int, dataSpeed: Int) {
             listeners.forEach {
@@ -107,16 +107,14 @@ object DataCollector {
         @Synchronized
         override fun onDistanceReceived(distance: Int, dataBandwidth: Int, dataSpeed: Int) {
             listeners.forEach {
-                it.get()?.onDistanceReceived(
-                        signalDetector.LastDistance,
+                it.get()?.onDistanceReceived(signalDetector.LastDistance,
                         signalDetector.CurrentSize, dataSpeed)
             }
             val d: List<Long> = signalDetector.processSignal(distance.toDouble())
             if (d.isNotEmpty()) {
                 onEntryListReceived(d)
             }
-            if (signalDetector.IsDone)
-                signalDetector.Reset()
+            if (signalDetector.IsDone) signalDetector.Reset()
         }
 
         @Synchronized
@@ -151,24 +149,16 @@ object DataCollector {
     fun connectToDevice() {
         val connectThread = Thread(Runnable {
             try {
-                setState(
-                        Connecting)
+                setState(Connecting)
                 val configurations: MutableMap<TerabeeSdk.DeviceType, TerabeeSdk.IConfiguration> = HashMap()
                 configurations[TerabeeSdk.DeviceType.MULTI_FLEX] = config
                 TerabeeSdk.getInstance().connect(object : TerabeeSdk.IUsbConnect {
                     override fun connected(success: Boolean, deviceType: TerabeeSdk.DeviceType?) {
-                        if (success) {
-                            setState(
-                                    Connected)
-                        } else {
-                            setState(
-                                    Disconnected)
-                        }
+                        setState(if (success) Connected else Disconnected)
                     }
 
                     override fun disconnected() {
-                        setState(
-                                Disconnected)
+                        setState(Disconnected)
                     }
 
                     override fun permission(granted: Boolean) {
@@ -186,16 +176,14 @@ object DataCollector {
     fun disconnectDevice() {
         try {
             TerabeeSdk.getInstance().disconnect()
-            setState(
-                    Disconnected)
+            setState(Disconnected)
         } catch (e: Exception) {
             Log.e(TAG, "Error disconnectDevice", e)
         }
     }
 
     private fun clearDataReceivers() {
-        TerabeeSdk.getInstance().unregisterDataReceive(
-                dataCollectorSensorCallback)
+        TerabeeSdk.getInstance().unregisterDataReceive(dataCollectorSensorCallback)
 
         // TerabeeSdk.getInstance().unregisterDataReceive(mDataDistanceCallback);
         // TerabeeSdk.getInstance().unregisterDataReceive(mDataMatrixCallback);

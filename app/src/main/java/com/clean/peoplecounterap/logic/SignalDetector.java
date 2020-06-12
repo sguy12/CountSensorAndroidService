@@ -31,6 +31,12 @@ public class SignalDetector {
     //private List<Long> rawDataTimeStamps = new ArrayList<Long>(2 * bufferSize);
     private List<Long> verifiedEntries = new LinkedList<>();
 
+    private int sensorInstalledHeight = 4000;
+
+    public void setSensorInstalledHeight(final int sensorInstalledHeight) {
+        this.sensorInstalledHeight = sensorInstalledHeight;
+    }
+
     public void Reset()
     {
         rawDataValues = new ArrayList<Double>();

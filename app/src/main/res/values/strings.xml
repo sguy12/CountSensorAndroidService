@@ -10,4 +10,5 @@
     <string name="entries">Entries:</string>
     <string name="lastChunk">Last chunk:</string>
     <string name="typeSixLetterWord">Type 6 letter word</string>
+    <string name="sensor_height">Sensor height:</string>
 </resources>

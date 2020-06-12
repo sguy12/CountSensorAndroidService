@@ -13,11 +13,13 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.clean.peoplecounterap.MainActivity
 import com.clean.peoplecounterap.R
+import com.clean.peoplecounterap.data.local.SPManager
 import com.clean.peoplecounterap.logic.DataCollector
 import com.clean.peoplecounterap.logic.SensorCallback
 import com.clean.peoplecounterap.logic.SensorState
 import com.clean.peoplecounterap.repository.remote.RestManager
 import com.clean.peoplecounterap.repository.remote.request.PostRequest
+import com.novoda.merlin.Merlin.Builder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -26,6 +28,7 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 import java.util.Timer
 import kotlin.concurrent.timerTask
 
@@ -77,6 +80,7 @@ class ForegroundService : Service() {
         }
     }
 
+    private lateinit var spManager: SPManager
     private val sensorCallback: SensorCallback = object :
             SensorCallback {
         override fun onSensorStateChanged(sensorState: SensorState) {
@@ -84,6 +88,7 @@ class ForegroundService : Service() {
 
         override fun onEntryListReceived(entryTimestamps: List<Long>) {
             val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+            format.timeZone = TimeZone.getTimeZone("UTC")
             val item = PostRequest(format.format(Calendar.getInstance().time), entryTimestamps.size)
             entries.add(item)
         }
@@ -103,21 +108,11 @@ class ForegroundService : Service() {
         }
     }
 
-    private val task = timerTask {
-        if (entries.isNotEmpty()) {
-            try {
-                job = GlobalScope.launch(Dispatchers.IO) {
-                    RestManager(applicationContext).somePost(entries)
-                    entries.clear()
-                }
-            } catch (e: Exception) {
-                entries.clear()
-                Timber.e(e)
-            }
-        }
-    }
+    private val merlin = Builder().withConnectableCallbacks().withDisconnectableCallbacks()
+            .build(this)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        spManager = SPManager(this)
         //do heavy work on a background thread
         val text = intent?.getStringExtra("inputExtra") ?: ""
         createNotificationChannel()
@@ -132,9 +127,31 @@ class ForegroundService : Service() {
         } catch (t: Throwable) {
             Timber.e(t)
         }
-        timer = Timer()
-        timer.schedule(task, 0, 5 * 60 * 1000)
+        merlin.bind()
+        merlin.registerConnectable {
+            timer = Timer()
+            timer.schedule(timerTask { request() }, 0, 5 * 60 * 1000)
+        }
+        merlin.registerDisconnectable {
+            timer.cancel()
+            job?.cancel()
+        }
         return START_STICKY
+    }
+
+    private fun request() {
+        sendBroadcast(Intent("NEXT_REQUEST"))
+        if (entries.isNotEmpty() && spManager.token?.isNotEmpty() == true) {
+            try {
+                job = GlobalScope.launch(Dispatchers.IO) {
+                    RestManager(applicationContext).somePost(entries)
+                    entries.clear()
+                }
+            } catch (e: Exception) {
+                entries.clear()
+                Timber.e(e)
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -142,6 +159,7 @@ class ForegroundService : Service() {
         DataCollector.stop()
         timer.cancel()
         job?.cancel()
+        merlin.unbind()
         super.onDestroy()
     }
 
