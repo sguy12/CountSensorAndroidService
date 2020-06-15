@@ -58,10 +58,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
+                android:layout_margin="6dp"
                 android:text="@string/sensorTypeTitle"
                 android:textSize="18sp" />
 
@@ -83,7 +80,7 @@
                     android:id="@+id/configuration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="4dp"
                     android:enabled="true"
                     android:text="@string/configuration" />
             </LinearLayout>
@@ -97,7 +94,7 @@
                     android:id="@+id/connect"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="4dp"
                     android:layout_weight="1"
                     android:text="@string/connect"
                     tools:ignore="ButtonStyle" />
@@ -106,7 +103,7 @@
                     android:id="@+id/disconnect"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="4dp"
                     android:layout_weight="1"
                     android:text="@string/disconnect"
                     tools:ignore="ButtonStyle" />
@@ -120,10 +117,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_margin="6dp"
                     android:text="@string/dataBandwidth"
                     android:textSize="18sp" />
 
@@ -131,10 +125,7 @@
                     android:id="@+id/tvDataBandwidth"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_margin="6dp"
                     android:layout_weight="1"
                     android:text="@string/initialSize" />
             </LinearLayout>
@@ -143,7 +134,7 @@
                 android:id="@+id/data"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_margin="8dp"
+                android:layout_margin="6dp"
                 android:layout_weight="1"
                 android:textSize="18sp" />
 
@@ -155,10 +146,7 @@
                 <TextView
                     android:layout_width="92dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_margin="6dp"
                     android:text="@string/entries"
                     android:textSize="18sp" />
 
@@ -166,10 +154,7 @@
                     android:id="@+id/entriesCount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_margin="6dp"
                     android:layout_weight="1"
                     android:text="@string/initialSize" />
             </LinearLayout>
@@ -182,10 +167,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_margin="6dp"
                     android:text="@string/lastChunk"
                     android:textSize="18sp" />
 
@@ -193,10 +175,7 @@
                     android:id="@+id/lastChunkText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_margin="6dp"
                     android:layout_weight="1"
                     android:text="" />
             </LinearLayout>
@@ -215,13 +194,12 @@
                         android:id="@+id/etSymbolsToSend"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:ellipsize="end"
                         android:hint="@string/typeSixLetterWord"
                         android:inputType="text"
-                        android:maxLines="1"
-                        tools:visibility="gone" />
+                        android:maxLines="1" />
 
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/btnSubmit"
@@ -232,22 +210,20 @@
                         android:layout_weight=".4"
                         android:backgroundTint="@color/colorAccent"
                         android:text="Submit"
-                        android:textColor="@android:color/white"
-                        tools:visibility="gone" />
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/tvTokenResponse"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_weight="1"
-                        android:textSize="18sp"
-                        android:visibility="gone"
-                        tools:text="SName: AEWJ "
-                        tools:visibility="visible" />
+                        android:textColor="@android:color/white" />
 
                 </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvTokenResponse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1"
+                    android:textSize="18sp"
+                    android:text="Token is empty" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvRemain"
@@ -255,8 +231,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
-                    android:text="Time remain: 5:49"
-                    android:textSize="18sp" />
+                    android:layout_marginBottom="4dp"
+                    android:textSize="18sp"
+                    tools:text="Time remain: 5:49" />
 
                 <TextView
                     android:id="@+id/tvLogCat"

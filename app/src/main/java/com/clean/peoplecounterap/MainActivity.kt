@@ -220,12 +220,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setSName() {
-        runOnUiThread {
-            etSymbolsToSend.visibility = View.GONE
-            btnSubmit.visibility = View.GONE
-            tvTokenResponse.visibility = View.VISIBLE
-            tvTokenResponse.text = "SName: ${spManager.sName}"
-        }
+        runOnUiThread { tvTokenResponse.text = "SName: ${spManager.sName}" }
     }
 
     override fun onResume() {
@@ -246,7 +241,7 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             val deviceType = sensorType
             when (sensorState) {
-                Disconnected -> {
+                Disconnected -> { // todo refactor to generic method
                     sensor_type.isEnabled = true
                     connect.isEnabled = true
                     disconnect.isEnabled = false
