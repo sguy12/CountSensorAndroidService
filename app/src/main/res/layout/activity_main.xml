@@ -14,7 +14,8 @@
             android:layout_gravity="center"
             android:layout_margin="8dp"
             android:text="@string/activityTitle"
-            android:textSize="28sp" />
+            android:textSize="28sp"
+            tools:text="Cleen Counter AP 31" />
 
         <ScrollView
             android:layout_width="match_parent"

@@ -49,13 +49,18 @@ public class SignalDetector {
         try {
             if(IsDone || IsInProc || distance < 0)
                 return new LinkedList<Long>();
+            //if(IsDone || IsInProc)
+                //return new LinkedList<Long>();
 
             //edit the distance value:
 
+            Double maxSignalDistance = 3000.0;
+            Double maxLengthToDetect = 2000.0;
+
             Double distanceFixed = distance;
-            //if(distanceFixed == 0) distanceFixed = 3000.0;
-            if(distanceFixed > 2000) distanceFixed = 3000.0;
-            distanceFixed = 3000.0 - distanceFixed;
+            if(distanceFixed == 0) distanceFixed = maxSignalDistance;
+            if(distanceFixed > maxLengthToDetect) distanceFixed = maxSignalDistance;
+            distanceFixed = maxSignalDistance - distanceFixed;
             LastDistance = distanceFixed.intValue();
 
             //CurrentSize++;
@@ -82,7 +87,7 @@ public class SignalDetector {
             errLine = 200;
             //first: convert the vector to it's median value (1D 5 sample median)
             MedianFilter medFilt = new MedianFilter();
-            List<Double> meanDataValues = medFilt.getMean(rawDataValues, 5);
+            List<Double> meanDataValues = medFilt.getMean(rawDataValues, 2);
             System.out.println("size of  rawDataValues=" + rawDataValues.size());
             System.out.println("size of  meanDataValues=" + meanDataValues.size());
 
