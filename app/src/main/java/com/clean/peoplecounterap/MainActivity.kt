@@ -1,12 +1,19 @@
-package com.clean.peoplecounterapp
+package com.clean.peoplecounterap
 
+import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -15,21 +22,27 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
-import com.clean.peoplecounterapp.logic.DataCollector.addListener
-import com.clean.peoplecounterapp.logic.DataCollector.config
-import com.clean.peoplecounterapp.logic.DataCollector.connectToDevice
-import com.clean.peoplecounterapp.logic.DataCollector.disconnectDevice
-import com.clean.peoplecounterapp.logic.DataCollector.removeListener
-import com.clean.peoplecounterapp.logic.DataCollector.sensorState
-import com.clean.peoplecounterapp.logic.DataCollector.sensorType
-import com.clean.peoplecounterapp.logic.SensorCallback
-import com.clean.peoplecounterapp.logic.SensorState
-import com.clean.peoplecounterapp.logic.SensorState.Connected
-import com.clean.peoplecounterapp.logic.SensorState.Connecting
-import com.clean.peoplecounterapp.logic.SensorState.Disconnected
-import com.cleen.peoplecounterapp.R
-import com.cleen.peoplecounterapp.databinding.ActivityMainBinding
+import androidx.core.widget.doOnTextChanged
+import com.clean.peoplecounterap.data.local.SPManager
+import com.clean.peoplecounterap.logic.DataCollector.addListener
+import com.clean.peoplecounterap.logic.DataCollector.config
+import com.clean.peoplecounterap.logic.DataCollector.connectToDevice
+import com.clean.peoplecounterap.logic.DataCollector.disconnectDevice
+import com.clean.peoplecounterap.logic.DataCollector.removeListener
+import com.clean.peoplecounterap.logic.DataCollector.sensorState
+import com.clean.peoplecounterap.logic.DataCollector.sensorType
+import com.clean.peoplecounterap.logic.SensorCallback
+import com.clean.peoplecounterap.logic.SensorState
+import com.clean.peoplecounterap.logic.SensorState.Connected
+import com.clean.peoplecounterap.logic.SensorState.Connecting
+import com.clean.peoplecounterap.logic.SensorState.Disconnected
+import com.clean.peoplecounterap.repository.remote.RestManager
+import com.fondesa.kpermissions.PermissionStatus
+import com.fondesa.kpermissions.allGranted
+import com.fondesa.kpermissions.anyPermanentlyDenied
+import com.fondesa.kpermissions.extension.permissionsBuilder
+import com.fondesa.kpermissions.request.PermissionRequest.Listener
+import com.google.android.material.snackbar.Snackbar
 import com.terabee.sdk.TerabeeSdk.DeviceType
 import com.terabee.sdk.TerabeeSdk.DeviceType.AUTO_DETECT
 import com.terabee.sdk.TerabeeSdk.DeviceType.EVO_3M
@@ -38,23 +51,32 @@ import com.terabee.sdk.TerabeeSdk.DeviceType.EVO_64PX
 import com.terabee.sdk.TerabeeSdk.DeviceType.EVO_MINI
 import com.terabee.sdk.TerabeeSdk.DeviceType.MULTI_FLEX
 import com.terabee.sdk.TerabeeSdk.MultiflexConfiguration
+import kotlinx.android.synthetic.main.activity_main.btnSubmit
 import kotlinx.android.synthetic.main.activity_main.configuration
 import kotlinx.android.synthetic.main.activity_main.connect
 import kotlinx.android.synthetic.main.activity_main.data
 import kotlinx.android.synthetic.main.activity_main.disconnect
 import kotlinx.android.synthetic.main.activity_main.entriesCount
+import kotlinx.android.synthetic.main.activity_main.etSensorHeight
+import kotlinx.android.synthetic.main.activity_main.etSymbolsToSend
 import kotlinx.android.synthetic.main.activity_main.lastChunkText
+import kotlinx.android.synthetic.main.activity_main.llActivityRoot
 import kotlinx.android.synthetic.main.activity_main.sensor_type
 import kotlinx.android.synthetic.main.activity_main.tvDataBandwidth
 import kotlinx.android.synthetic.main.activity_main.tvLogCat
+import kotlinx.android.synthetic.main.activity_main.tvRemain
+import kotlinx.android.synthetic.main.activity_main.tvTokenResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
     private var entriesCounter = 0
-    private var mBinding: ActivityMainBinding? = null
     private var selectedSensors: BooleanArray? = null
+    private lateinit var spManager: SPManager
     private val sensorCallback: SensorCallback = object : SensorCallback {
         override fun onEntryListReceived(entryTimestamps: List<Long>) {
             updateEntries(entryTimestamps)
@@ -83,6 +105,7 @@ class MainActivity : AppCompatActivity() {
 
     private val logReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            tvLogCat.visibility = View.VISIBLE
             val log = intent?.getStringExtra("log")
             if (log?.contains("--> POST") == true) {
                 tvLogCat.text = ""
@@ -91,10 +114,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("ShowToast")
+    private val nextRequestReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            countDownTimer.start()
+        }
+    }
+
+    private val countDownTimer = object : CountDownTimer(5 * 60 * 1000L, 1000L) {
+        override fun onFinish() {
+        }
+
+        override fun onTick(millisUntilFinished: Long) {
+            val remainedSecs = millisUntilFinished / 1000
+            tvRemain.text = "Time remain: " + (remainedSecs / 60) + ":" + (remainedSecs % 60)
+        }
+    }
+
+    @SuppressLint("ShowToast", "MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        setContentView(R.layout.activity_main)
         configuration.isEnabled = true
         // initialize UI
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
@@ -118,11 +157,79 @@ class MainActivity : AppCompatActivity() {
         updateUiState(sensorState, false)
         addListener(sensorCallback)
         registerReceiver(logReceiver, IntentFilter("LOG"))
+        registerReceiver(nextRequestReceiver, IntentFilter("NEXT_REQUEST"))
+        btnSubmit.setOnClickListener { checkIsLetterValid() }
+        spManager = SPManager(this)
+        if (spManager.sName?.isNotEmpty() == true) setSName()
+        etSensorHeight.setText(spManager.sensorHeight.toString())
+        etSensorHeight.doOnTextChanged { text, _, _, _ ->
+            text?.toString()?.toIntOrNull()?.let { spManager.sensorHeight = it }
+        }
+    }
+
+    private fun checkIsLetterValid() {
+        if (etSymbolsToSend.text.toString().contains(Regex("^[a-zA-Z]{6}\$"))) {
+            checkPermissions()
+        } else {
+            snackbar("Text is not equal to 6 letters")
+        }
+    }
+
+    private fun snackbar(text: String) {
+        Snackbar.make(llActivityRoot, text, Snackbar.LENGTH_SHORT).show()
+    }
+
+    private fun checkPermissions() {
+        val build = permissionsBuilder(permission.READ_PHONE_STATE).build()
+        build.addListener(object : Listener {
+            override fun onPermissionsResult(result: List<PermissionStatus>) {
+                when {
+                    result.allGranted() -> sendLettersRequest()
+                    result.anyPermanentlyDenied() -> {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        intent.data = Uri.fromParts("package", packageName, null)
+                        startActivity(intent)
+                    }
+                    else -> snackbar("To send request you should grant permissions")
+                }
+            }
+        })
+        build.send()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun sendLettersRequest() { // todo hide keyboard
+        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        var uuid = telephonyManager.deviceId
+        if (uuid.isNullOrEmpty()) {
+            uuid = (if (VERSION.SDK_INT >= VERSION_CODES.O) telephonyManager.imei else "EMPTY_UUID")
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val response = RestManager(applicationContext).generateToken(
+                    mapOf("pCode" to etSymbolsToSend.text.toString(), "uuid" to uuid))
+            if (response.isSuccessful) {
+                spManager.sName = response.body()?.sname
+                spManager.token = response.body()?.t
+                setSName()
+            } else {
+                snackbar(response.errorBody()?.string() ?: return@launch)
+            }
+        }
+    }
+
+    private fun setSName() {
+        runOnUiThread {
+            etSymbolsToSend.visibility = View.GONE
+            btnSubmit.visibility = View.GONE
+            tvTokenResponse.visibility = View.VISIBLE
+            tvTokenResponse.text = "SName: ${spManager.sName}"
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        entriesCounter = 0
         entriesCount.text = entriesCounter.toString()
         lastChunkText.text = ""
     }
@@ -130,6 +237,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         removeListener(sensorCallback)
         unregisterReceiver(logReceiver)
+        unregisterReceiver(nextRequestReceiver)
+        countDownTimer.cancel()
         super.onDestroy()
     }
 
@@ -176,8 +285,7 @@ class MainActivity : AppCompatActivity() {
             entriesCounter += list.size
             entriesCount.text = entriesCounter.toString()
             val dateStr = Date(list[list.size - 1]).toString()
-            val lastChunk = dateStr + ": " + list.size + " items"
-            lastChunkText.text = lastChunk
+            lastChunkText.text = dateStr + ": " + list.size + " items"
         }
     }
 

@@ -1,4 +1,4 @@
-package com.clean.peoplecounterapp.repository.remote.request
+package com.clean.peoplecounterap.repository.remote.request
 
 import com.google.gson.annotations.SerializedName
 

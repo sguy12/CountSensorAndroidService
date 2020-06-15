@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Clean people counter APP</string>
-    <string name="activityTitle">Clean People Counter APP 30</string>
+    <string name="app_name">Clean people counter AP</string>
+    <string name="activityTitle">Clean People Counter AP 30</string>
     <string name="sensorTypeTitle">Sensor type</string>
     <string name="configuration">Configuration ...</string>
     <string name="connect">Connect</string>
@@ -9,4 +9,6 @@
     <string name="initialSize">0</string>
     <string name="entries">Entries:</string>
     <string name="lastChunk">Last chunk:</string>
+    <string name="typeSixLetterWord">Type 6 letter word</string>
+    <string name="sensor_height">Sensor height:</string>
 </resources>

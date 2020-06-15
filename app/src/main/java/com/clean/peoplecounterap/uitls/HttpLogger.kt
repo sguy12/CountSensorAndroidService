@@ -1,11 +1,11 @@
-package com.clean.peoplecounterapp.uitls
+package com.clean.peoplecounterap.uitls
 
 import android.content.Context
 import android.content.Intent
 import android.util.Log.INFO
-import com.clean.peoplecounterapp.uitls.HttpLogger.Level.BODY
-import com.clean.peoplecounterapp.uitls.HttpLogger.Level.HEADERS
-import com.clean.peoplecounterapp.uitls.HttpLogger.Level.NONE
+import com.clean.peoplecounterap.uitls.HttpLogger.Level.BODY
+import com.clean.peoplecounterap.uitls.HttpLogger.Level.HEADERS
+import com.clean.peoplecounterap.uitls.HttpLogger.Level.NONE
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain

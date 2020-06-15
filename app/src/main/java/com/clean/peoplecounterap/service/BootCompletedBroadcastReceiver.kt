@@ -1,4 +1,4 @@
-package com.clean.peoplecounterapp.service
+package com.clean.peoplecounterap.service
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver

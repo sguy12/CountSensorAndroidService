@@ -1,6 +1,6 @@
-package com.clean.peoplecounterapp.logic;
+package com.clean.peoplecounterap.logic;
 
-import com.clean.peoplecounterapp.filter.MedianFilter;
+import com.clean.peoplecounterap.filter.MedianFilter;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
@@ -30,6 +30,12 @@ public class SignalDetector {
     private List<Double> rawDataValues = new ArrayList<Double>();
     //private List<Long> rawDataTimeStamps = new ArrayList<Long>(2 * bufferSize);
     private List<Long> verifiedEntries = new LinkedList<>();
+
+    private int sensorInstalledHeight = 4000;
+
+    public void setSensorInstalledHeight(final int sensorInstalledHeight) {
+        this.sensorInstalledHeight = sensorInstalledHeight;
+    }
 
     public void Reset()
     {
