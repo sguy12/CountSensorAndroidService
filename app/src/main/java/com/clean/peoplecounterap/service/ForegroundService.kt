@@ -32,9 +32,6 @@ import java.util.TimeZone
 import java.util.Timer
 import kotlin.concurrent.timerTask
 
-/**
- * Runs continuously, even when the app is closed to keep the sensor always active
- */
 class ForegroundService : Service() {
 
     companion object {
@@ -51,16 +48,11 @@ class ForegroundService : Service() {
             ContextCompat.startForegroundService(context, startIntent)
         }
 
-        /**
-         * This is the method that can be called to update the Notification
-         */
         fun updateNotification(context: Context, text: String) {
-            val notification: Notification = createNotification(
-                    context, text)
+            val notification: Notification = createNotification(context, text)
             val mNotificationManager = context.getSystemService(
                     Context.NOTIFICATION_SERVICE) as NotificationManager
-            mNotificationManager.notify(
-                    FOREGROUND_SERVICE_NOTIFICATION_ID, notification)
+            mNotificationManager.notify(FOREGROUND_SERVICE_NOTIFICATION_ID, notification)
         }
 
         private fun createNotification(context: Context, text: String): Notification {
@@ -80,17 +72,22 @@ class ForegroundService : Service() {
         }
     }
 
-    private lateinit var spManager: SPManager
-    private val sensorCallback: SensorCallback = object :
-            SensorCallback {
+    private val sensorCallback: SensorCallback = object : SensorCallback {
         override fun onSensorStateChanged(sensorState: SensorState) {
         }
 
         override fun onEntryListReceived(entryTimestamps: List<Long>) {
             val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
             format.timeZone = TimeZone.getTimeZone("UTC")
-            val item = PostRequest(format.format(Calendar.getInstance().time), entryTimestamps.size)
-            entries.add(item)
+            val value = if (spManager.countMode == 0) {
+                entryTimestamps.size
+            } else {
+                processedValueInt(entryTimestamps.size)
+            }
+            if (value != 0) {
+                val item = PostRequest(format.format(Calendar.getInstance().time), value)
+                entries.add(item)
+            }
         }
 
         override fun onDistanceReceived(distance: Int, dataBandwidth: Int, dataSpeed: Int) {
@@ -108,8 +105,11 @@ class ForegroundService : Service() {
         }
     }
 
+    private lateinit var spManager: SPManager
     private val merlin = Builder().withConnectableCallbacks().withDisconnectableCallbacks()
             .build(this)
+    private var totalCount: Int = 0
+    private var totalEffectiveCount: Int = 0
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         spManager = SPManager(this)
@@ -173,5 +173,16 @@ class ForegroundService : Service() {
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(serviceChannel)
         }
+    }
+
+    private fun processedValueInt(valueInt: Int): Int {
+        var tmpValue = totalCount + valueInt
+        if (tmpValue > 0 && tmpValue % 2 != 0) {
+            tmpValue++
+        }
+        val currentTotalCount = tmpValue / 2
+        val processedValueInt = currentTotalCount - totalEffectiveCount
+        totalEffectiveCount = currentTotalCount
+        return processedValueInt
     }
 }

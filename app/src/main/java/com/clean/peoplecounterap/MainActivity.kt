@@ -18,7 +18,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
@@ -62,6 +61,7 @@ import kotlinx.android.synthetic.main.activity_main.etSymbolsToSend
 import kotlinx.android.synthetic.main.activity_main.lastChunkText
 import kotlinx.android.synthetic.main.activity_main.llActivityRoot
 import kotlinx.android.synthetic.main.activity_main.sensor_type
+import kotlinx.android.synthetic.main.activity_main.spCountMode
 import kotlinx.android.synthetic.main.activity_main.tvDataBandwidth
 import kotlinx.android.synthetic.main.activity_main.tvLogCat
 import kotlinx.android.synthetic.main.activity_main.tvRemain
@@ -136,21 +136,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         configuration.isEnabled = true
         // initialize UI
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
-                SENSOR_TYPES)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sensor_type.adapter = adapter
-        sensor_type.setSelection(0)
-        sensor_type.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int,
-                    id: Long) {
-                setCurrentType((view as TextView).text.toString())
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // no any action
-            }
-        }
+        initSensorType()
+        initCountMode()
         connect.setOnClickListener { connectToDevice() }
         disconnect.setOnClickListener { disconnectDevice() }
         configuration.setOnClickListener { showMultiflexConfigurationDialog() }
@@ -165,6 +152,23 @@ class MainActivity : AppCompatActivity() {
         etSensorHeight.doOnTextChanged { text, _, _, _ ->
             text?.toString()?.toIntOrNull()?.let { spManager.sensorHeight = it }
         }
+    }
+
+    private fun initSensorType() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
+                SENSOR_TYPES)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        sensor_type.adapter = adapter
+        sensor_type.doOnItemSelected<String> { item, _ ->
+            setCurrentType(item)
+        }
+    }
+
+    private fun initCountMode() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, COUNT_MODE)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spCountMode.adapter = adapter
+        spCountMode.doOnItemSelected<String> { _, position -> spManager.countMode = position }
     }
 
     private fun checkIsLetterValid() {
@@ -237,40 +241,31 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    private fun updateUiState(type: Boolean, isConnect: Boolean,
+            isDisconnect: Boolean, isConfig: Boolean, toast: Boolean, name: String) {
+        sensor_type.isEnabled = type
+        connect.isEnabled = isConnect
+        disconnect.isEnabled = isDisconnect
+        data.text = ""
+        tvDataBandwidth.text = "0"
+        configuration.isEnabled = isConfig
+        if (toast) {
+            showShortToast("Unable connect to sensor: $name")
+        }
+    }
+
     private fun updateUiState(sensorState: SensorState, showToast: Boolean) {
         runOnUiThread {
-            val deviceType = sensorType
             when (sensorState) {
-                Disconnected -> { // todo refactor to generic method
-                    sensor_type.isEnabled = true
-                    connect.isEnabled = true
-                    disconnect.isEnabled = false
-                    data.text = ""
-                    tvDataBandwidth.text = "0"
-                    configuration.isEnabled = (deviceType == MULTI_FLEX || deviceType == AUTO_DETECT)
-                    if (showToast) {
-                        showShortToast("Unable connect to sensor: " + deviceType.name)
-                    }
+                Disconnected -> {
+                    val configEnabled = sensorType == MULTI_FLEX || sensorType == AUTO_DETECT
+                    updateUiState(type = true, isConnect = true, isDisconnect = false,
+                            isConfig = configEnabled, toast = showToast, name = sensorType.name)
                 }
-                Connecting -> {
-                    sensor_type.isEnabled = false
-                    connect.isEnabled = false
-                    disconnect.isEnabled = false
-                    data.text = ""
-                    tvDataBandwidth.text = "0"
-                    configuration.isEnabled = false
-                }
-                Connected -> {
-                    sensor_type.isEnabled = false
-                    connect.isEnabled = false
-                    disconnect.isEnabled = true
-                    data.text = ""
-                    tvDataBandwidth.text = "0"
-                    configuration.isEnabled = false
-                    if (showToast) {
-                        showShortToast("Connected sensor: " + deviceType.name)
-                    }
-                }
+                Connecting -> updateUiState(type = false, isConnect = false, isDisconnect = false,
+                        isConfig = false, toast = false, name = sensorType.name)
+                Connected -> updateUiState(type = false, isConnect = false, isDisconnect = true,
+                        isConfig = false, toast = false, name = sensorType.name)
             }
         }
     }
@@ -381,6 +376,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+
+        private const val SINGLE_COUNT = "single_count"
+        private const val DOUBLE_COUNT = "double_count"
+
         private val SENSOR_TYPES = arrayOf(
                 AUTO_DETECT.name,
                 EVO_3M.name,
@@ -388,6 +387,7 @@ class MainActivity : AppCompatActivity() {
                 EVO_64PX.name,
                 MULTI_FLEX.name,
                 EVO_MINI.name)
+        private val COUNT_MODE = arrayOf(SINGLE_COUNT, DOUBLE_COUNT)
         private val MULTIFLEX_SENSORS_LIST = arrayOf(
                 "Enable Sensor 1",
                 "Enable Sensor 2",
@@ -398,5 +398,18 @@ class MainActivity : AppCompatActivity() {
                 "Enable Sensor 7",
                 "Enable Sensor 8"
         )
+    }
+}
+
+inline fun <T> AdapterView<*>.doOnItemSelected(
+        crossinline block: (item: T, position: Int) -> Unit) {
+    onItemSelectedListener = object : OnItemSelectedListener {
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            block(selectedItem as T, position)
+        }
     }
 }
