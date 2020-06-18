@@ -169,7 +169,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkIsLetterValid() {
         if (etSymbolsToSend.text.toString().contains(Regex("^[a-zA-Z]{6}\$"))) {
-            checkPermissions()
+            sendLettersRequest()
+            //checkPermissions()
         } else {
             snackbar("Text is not equal to 6 letters")
         }
@@ -200,11 +201,16 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun sendLettersRequest() { // todo hide keyboard
-        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        var uuid = telephonyManager.deviceId
-        if (uuid.isNullOrEmpty()) {
-            uuid = (if (VERSION.SDK_INT >= VERSION_CODES.O) telephonyManager.imei else "EMPTY_UUID")
-        }
+//        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+//        var uuid = telephonyManager.deviceId
+//        if (uuid.isNullOrEmpty()) {
+//            uuid = (if (VERSION.SDK_INT >= VERSION_CODES.O) telephonyManager.imei else "EMPTY_UUID")
+//        }
+//        if (uuid.isNullOrEmpty()) {
+//            uuid = "EMPTY_UUID"
+//        }
+
+        var uuid = "EMPTY_UUID"
 
         GlobalScope.launch(Dispatchers.IO) {
             val response = RestManager(applicationContext).generateToken(
