@@ -180,9 +180,10 @@ class ForegroundService : Service() {
         if (tmpValue > 0 && tmpValue % 2 != 0) {
             tmpValue++
         }
-        val currentTotalCount = tmpValue / 2
-        val processedValueInt = currentTotalCount - totalEffectiveCount
-        totalEffectiveCount = currentTotalCount
-        return processedValueInt
+        val totalVisitors = tmpValue / 2
+        val visitorsSinceLastCount = totalVisitors - totalEffectiveCount
+        totalEffectiveCount = totalVisitors
+        totalCount += valueInt
+        return visitorsSinceLastCount
     }
 }
