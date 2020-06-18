@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkIsLetterValid() {
-        if (etSymbolsToSend.text.toString().contains(Regex("^[a-zA-Z]{6}\$"))) {
+        if (etSymbolsToSend.text.toString().contains(Regex("^[a-zA-Z0-9]{6}\$"))) {
             sendLettersRequest()
             //checkPermissions()
         } else {

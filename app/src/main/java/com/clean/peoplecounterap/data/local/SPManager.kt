@@ -18,9 +18,7 @@ class SPManager(context: Context) : SharedPreferenceContext {
 
     var sName: String?
         get() = get(S_NAME) ?: ""
-        set(value) {
-            put(S_NAME, value)
-        }
+        set(value) = put(S_NAME, value)
 
     var token: String?
         get() = get(TOKEN)
