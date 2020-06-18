@@ -4,7 +4,8 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.clean.peoplecounterap.data.local.SPManager.Keys.COUNT_MODE
-import com.clean.peoplecounterap.data.local.SPManager.Keys.SENSOR_HEIGHT
+import com.clean.peoplecounterap.data.local.SPManager.Keys.SENSOR_MAX
+import com.clean.peoplecounterap.data.local.SPManager.Keys.SENSOR_MIN
 import com.clean.peoplecounterap.data.local.SPManager.Keys.S_NAME
 import com.clean.peoplecounterap.data.local.SPManager.Keys.TOKEN
 import com.clean.peoplecounterap.uitls.SharedPreferenceContext
@@ -25,9 +26,14 @@ class SPManager(context: Context) : SharedPreferenceContext {
         get() = get(TOKEN)
         set(value) = put(TOKEN, value)
 
-    var sensorHeight: Int
-    get() = get(SENSOR_HEIGHT)?: 4000
-    set(value) = put(SENSOR_HEIGHT, value)
+    var sensorMax: Int
+    get() = get(SENSOR_MAX)?: 4000
+    set(value) = put(SENSOR_MAX, value)
+
+
+    var sensorMin: Int
+    get() = get(SENSOR_MIN)?: 800
+    set(value) = put(SENSOR_MIN, value)
 
     var countMode: Int
     get() = get(COUNT_MODE)?: 0
@@ -37,6 +43,7 @@ class SPManager(context: Context) : SharedPreferenceContext {
         S_NAME,
         TOKEN,
         COUNT_MODE,
-        SENSOR_HEIGHT
+        SENSOR_MAX,
+        SENSOR_MIN
     }
 }

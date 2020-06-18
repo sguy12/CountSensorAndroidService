@@ -56,7 +56,8 @@ import kotlinx.android.synthetic.main.activity_main.connect
 import kotlinx.android.synthetic.main.activity_main.data
 import kotlinx.android.synthetic.main.activity_main.disconnect
 import kotlinx.android.synthetic.main.activity_main.entriesCount
-import kotlinx.android.synthetic.main.activity_main.etSensorHeight
+import kotlinx.android.synthetic.main.activity_main.etSensorMax
+import kotlinx.android.synthetic.main.activity_main.etSensorMin
 import kotlinx.android.synthetic.main.activity_main.etSymbolsToSend
 import kotlinx.android.synthetic.main.activity_main.lastChunkText
 import kotlinx.android.synthetic.main.activity_main.llActivityRoot
@@ -148,9 +149,13 @@ class MainActivity : AppCompatActivity() {
         btnSubmit.setOnClickListener { checkIsLetterValid() }
         spManager = SPManager(this)
         if (spManager.sName?.isNotEmpty() == true) setSName()
-        etSensorHeight.setText(spManager.sensorHeight.toString())
-        etSensorHeight.doOnTextChanged { text, _, _, _ ->
-            text?.toString()?.toIntOrNull()?.let { spManager.sensorHeight = it }
+        etSensorMax.setText(spManager.sensorMax.toString())
+        etSensorMax.doOnTextChanged { text, _, _, _ ->
+            text?.toString()?.toIntOrNull()?.let { spManager.sensorMax = it }
+        }
+        etSensorMin.setText(spManager.sensorMin.toString())
+        etSensorMin.doOnTextChanged { text, _, _, _ ->
+            text?.toString()?.toIntOrNull()?.let { spManager.sensorMin = it }
         }
     }
 

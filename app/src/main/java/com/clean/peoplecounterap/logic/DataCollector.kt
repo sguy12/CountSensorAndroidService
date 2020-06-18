@@ -44,7 +44,7 @@ object DataCollector {
      */
     fun init(context: Context) {
         DataCollector.context = context
-        signalDetector.setSensorInstalledHeight(SPManager(context).sensorHeight)
+        signalDetector.setSensorInstalledHeight(SPManager(context).sensorMax)
 
         // init Terabee Sdk
         TerabeeSdk.getInstance().init(context)
