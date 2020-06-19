@@ -1,6 +1,7 @@
 package com.clean.peoplecounterap.logic;
 
 import com.clean.peoplecounterap.filter.MedianFilter;
+import kotlin.Pair;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
@@ -8,6 +9,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import timber.log.Timber;
 
 public class SignalDetector {
 
@@ -32,6 +35,10 @@ public class SignalDetector {
     private List<Long> verifiedEntries = new LinkedList<>();
 
     private int sensorInstalledHeight = 4000;
+
+    public void setMinMax(@NotNull Pair<Integer, Integer> pair) {
+        Timber.d(pair.toString());
+    }
 
     public void setSensorInstalledHeight(final int sensorInstalledHeight) {
         this.sensorInstalledHeight = sensorInstalledHeight;

@@ -194,6 +194,8 @@ object DataCollector {
         DataCollector.sensorState = sensorState
         dataCollectorSensorCallback.onSensorStateChanged(sensorState)
     }
+
+    fun setMinMax(pair: Pair<Int, Int>) = signalDetector.setMinMax(pair)
 }
 
 /**

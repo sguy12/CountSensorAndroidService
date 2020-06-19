@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -14,6 +15,8 @@ import androidx.core.content.ContextCompat
 import com.clean.peoplecounterap.MainActivity
 import com.clean.peoplecounterap.R
 import com.clean.peoplecounterap.data.local.SPManager
+import com.clean.peoplecounterap.data.local.SPManager.Keys.SENSOR_MAX
+import com.clean.peoplecounterap.data.local.SPManager.Keys.SENSOR_MIN
 import com.clean.peoplecounterap.logic.DataCollector
 import com.clean.peoplecounterap.logic.SensorCallback
 import com.clean.peoplecounterap.logic.SensorState
@@ -113,6 +116,13 @@ class ForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         spManager = SPManager(this)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _: SharedPreferences?, key: String? ->
+            if (key?.equals(SENSOR_MAX.name) == true || key?.equals(SENSOR_MIN.name) == true) {
+                DataCollector.setMinMax(spManager.sensorMax to spManager.sensorMin)
+            }
+        }
+        spManager.sp.registerOnSharedPreferenceChangeListener(listener)
+
         //do heavy work on a background thread
         val text = intent?.getStringExtra("inputExtra") ?: ""
         createNotificationChannel()

@@ -22,7 +22,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 29
 
-        versionCode 23
+        versionCode 24
         versionName "1.1.3"
     }
 

@@ -8,12 +8,9 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Settings
-import android.telephony.TelephonyManager
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -164,9 +161,7 @@ class MainActivity : AppCompatActivity() {
                 SENSOR_TYPES)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sensor_type.adapter = adapter
-        sensor_type.doOnItemSelected<String> { item, _ ->
-            setCurrentType(item)
-        }
+        sensor_type.doOnItemSelected<String> { item, _ -> setCurrentType(item) }
     }
 
     private fun initCountMode() {
@@ -185,9 +180,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun snackbar(text: String) {
-        Snackbar.make(llActivityRoot, text, Snackbar.LENGTH_SHORT).show()
-    }
+    private fun snackbar(text: String) =
+            Snackbar.make(llActivityRoot, text, Snackbar.LENGTH_SHORT).show()
 
     private fun checkPermissions() {
         val build = permissionsBuilder(permission.READ_PHONE_STATE).build()
@@ -234,9 +228,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setSName() {
-        runOnUiThread { tvTokenResponse.text = "SName: ${spManager.sName}" }
-    }
+    private fun setSName() = runOnUiThread { tvTokenResponse.text = "SName: ${spManager.sName}" }
 
     override fun onResume() {
         super.onResume()
@@ -260,9 +252,7 @@ class MainActivity : AppCompatActivity() {
         data.text = ""
         tvDataBandwidth.text = "0"
         configuration.isEnabled = isConfig
-        if (toast) {
-            showShortToast("Unable connect to sensor: $name")
-        }
+        if (toast) showShortToast("Unable connect to sensor: $name")
     }
 
     private fun updateUiState(sensorState: SensorState, showToast: Boolean) {
@@ -281,13 +271,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateEntries(list: List<Long>) {
-        runOnUiThread {
-            entriesCounter += list.size
-            entriesCount.text = entriesCounter.toString()
-            val dateStr = Date(list[list.size - 1]).toString()
-            lastChunkText.text = dateStr + ": " + list.size + " items"
-        }
+    private fun updateEntries(list: List<Long>) = runOnUiThread {
+        entriesCounter += list.size
+        entriesCount.text = entriesCounter.toString()
+        val dateStr = Date(list[list.size - 1]).toString()
+        lastChunkText.text = dateStr + ": " + list.size + " items"
     }
 
     private fun setCurrentType(value: String) {
@@ -351,39 +339,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateDistance(distance: Int, dataBandwidth: Int) {
-        runOnUiThread {
-            if (sensorState === Connected) {
-                tvDataBandwidth.text = "Bandwidth: $dataBandwidth"
-                data.text = "Distance: $distance"
-            }
+    private fun updateDistance(distance: Int, dataBandwidth: Int) = runOnUiThread {
+        if (sensorState === Connected) {
+            tvDataBandwidth.text = "Bandwidth: $dataBandwidth"
+            data.text = "Distance: $distance"
         }
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateDistances(list: List<Int>?, dataBandwidth: Int) {
-        runOnUiThread {
-            if (sensorState === Connected) {
-                tvDataBandwidth.text = "Bandwidth: $dataBandwidth"
-                if (list != null) {
-                    Timber.d("onDistancesReceived, size: %s", list.size)
-                    Timber.d("onDistancesReceived, list: $list")
-                    var distances = "Distances: \n"
-                    for (i in list.indices) {
-                        distances += "Sensor " + (i + 1).toString()
-                        distances += ": " + list[i].toString()
-                        distances += "\n"
-                    }
-                    data.text = distances
+    private fun updateDistances(list: List<Int>?, dataBandwidth: Int) = runOnUiThread {
+        if (sensorState === Connected) {
+            tvDataBandwidth.text = "Bandwidth: $dataBandwidth"
+            if (list != null) {
+                Timber.d("onDistancesReceived, size: %s", list.size)
+                Timber.d("onDistancesReceived, list: $list")
+                var distances = "Distances: \n"
+                for (i in list.indices) {
+                    distances += "Sensor " + (i + 1).toString()
+                    distances += ": " + list[i].toString()
+                    distances += "\n"
                 }
+                data.text = distances
             }
         }
     }
 
-    private fun showShortToast(message: String) {
-        runOnUiThread {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        }
+    private fun showShortToast(message: String) = runOnUiThread {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     companion object {

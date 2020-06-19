@@ -37,7 +37,7 @@ class SPManager(context: Context) : SharedPreferenceContext {
     get() = get(COUNT_MODE)?: 0
     set(value) = put(COUNT_MODE, value)
 
-    private enum class Keys {
+    enum class Keys {
         S_NAME,
         TOKEN,
         COUNT_MODE,
