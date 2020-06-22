@@ -41,7 +41,7 @@ class ForegroundService : Service() {
         private const val FOREGROUND_SERVICE_NOTIFICATION_ID: Int = 10
         private const val CHANNEL_ID = "ForegroundServiceChannel"
 
-        private val entries = mutableListOf<PostRequest>()
+        private var entries = mutableListOf<PostRequest>()
         private var timer = Timer()
         private var job: Job? = null
 
@@ -91,6 +91,7 @@ class ForegroundService : Service() {
                 val item = PostRequest(format.format(Calendar.getInstance().time), value)
                 entries.add(item)
             }
+            entries = entries.toHashSet().toMutableList()
         }
 
         override fun onDistanceReceived(distance: Int, dataBandwidth: Int, dataSpeed: Int) {
